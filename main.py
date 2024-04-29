@@ -11,5 +11,6 @@ if st.button("点击排序", type="primary", use_container_width=True):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     i = 0
+    jielong.sort_sales()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

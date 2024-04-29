@@ -60,15 +60,29 @@ def sort_sales(filepath='接龙.txt'):
     # print(df_sorted)
 
     print_out = ''
-    index = 1
-    for i in df_sorted['text']:
+    seq_title = ["\n第一名", "\n第二名", "\n第三名", "\n第四名", "\n第五名"]
+    last_top_sales = -1
+    top_sales = 0
+    seq = 0
+    for index, row in df_sorted.iterrows():
+        top_sales = row['成交数']
+        i = row['text']
+
         i = i[i.find("."):]
         if len(i) == 0:
             continue
-        i = str(index) + i
-        print_out += i
-        index += 1
+        if top_sales == last_top_sales:
+            print_out += i
+        else:
+            if seq < 5:
+                print_out += seq_title[seq] + i
+                seq += 1
+            else:
+                break
 
-    # print(print_out)
+        last_top_sales = top_sales
 
-    return print_out
+    result = print_out.replace('.', '')
+    print(result)
+
+    return result

@@ -1,6 +1,7 @@
 import jielong
 import streamlit as st
 
+st.title('接龙数据排序')
 text_input = st.text_area(label='请输入接龙信息:', height=200)
 if st.button("点击排序", type="primary", use_container_width=True):
     jielong.save_text_to_file(text_input)

@@ -12,7 +12,7 @@ with tab1:
     if st.button("当日排序", type="primary", use_container_width=True) and len(text_input) > 0:
         jielong.save_text_to_file(text_input)
         st.title('排序结果:')
-        print(para_start1, para_end1)
+        # print(para_start1, para_end1)
         st.text(jielong.sort_sales(para_start1, para_end1))
 
 with tab2:
@@ -21,7 +21,7 @@ with tab2:
     if st.button("累计排序", type="primary", use_container_width=True) and len(text_input) > 0:
         jielong.save_text_to_file(text_input)
         st.title('排序结果:')
-        print(para_start2, para_end2)
+        # print(para_start2, para_end2)
         st.text(jielong.sort_sales(para_start2, para_end2))
 
 

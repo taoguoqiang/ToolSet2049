@@ -1,5 +1,9 @@
 import pandas as pd
+import re
 
+
+def remove_non_digits(s):
+    return re.sub(r'\D', '', s)
 
 def save_text_to_file(text_str):
     with open('接龙.txt', 'w', encoding='utf-8') as file:
@@ -11,16 +15,24 @@ def get_sales_count(line, para_start, para_end):
     para_end = para_end.replace(' ', '')
 
     start_index = line.find(para_start) + len(para_start)
-
+    end_index = 0
     max_para_len = 5
+
     end_index = line[start_index:].find(para_end) + start_index
+
 
     if end_index <= start_index:
         sale_num = 0
     else:
         if end_index - start_index > max_para_len:
             end_index = start_index + max_para_len
-        sale_num = int(line[start_index:end_index])
+
+        try:
+            sale_num = int(line[start_index:end_index])
+        except:
+            print('exception:', line[start_index:end_index])
+            sale_num = int(remove_non_digits(line[start_index:end_index]))
+            print(sale_num)
 
     # print(sale_num)
     return sale_num
@@ -110,6 +122,6 @@ def sort_sales(para_start='累计收入', para_end='元'):
         last_top_sales = top_sales
 
     result = print_out.replace('.', '')
-    print(result)
+    # print(result)
 
     return result

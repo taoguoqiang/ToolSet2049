@@ -125,3 +125,91 @@ def sort_sales(para_start='累计收入', para_end='元'):
     # print(result)
 
     return result
+
+
+
+def find_first_chinese_char(s):
+    # 定义一个正则表达式，匹配任何中文字符
+    pattern = re.compile(r'[\u4e00-\u9fff]')
+
+    # 在字符串中搜索第一个匹配的非中文字符
+    match = pattern.search(s)
+
+    # 如果找到了匹配，返回它的位置
+    if match:
+        return match.start()
+    else:
+        # 如果没有找到非中文字符，返回-1或者None
+        return -1
+
+
+def get_name_of_parent(line, para_start='.', para_end='家'):
+    para_start = para_start.replace(' ', '')
+    para_end = para_end.replace(' ', '')
+
+    start_index = 0
+    end_index = line[start_index:].find(para_end) + start_index
+
+    name_of_parent = ''
+    if end_index <= 0:
+        return ''
+
+    start_index = find_first_chinese_char(line[start_index:end_index])
+
+    if start_index < 0:
+        return ''
+
+    try:
+        name_of_parent = line[start_index:end_index]
+    except:
+        print('exception:', line[start_index:end_index])
+        name_of_parent = line[0:end_index]
+        print(name_of_parent)
+
+    return name_of_parent
+
+
+def record_str_to_data_list(personal_record):
+    parent_name = get_name_of_parent(personal_record)
+    total_sale = get_sales_count(personal_record, '累计', '本')
+    batch_sale = get_sales_count(personal_record, '批发', '本')
+    retail_sale = total_sale - batch_sale
+
+    return [parent_name, retail_sale, batch_sale, total_sale]
+
+
+def update_sales_to_record_xlsx():
+    records_in_persons = seperate_personal()
+    record_xlsx_data = pd.read_excel(record_xlsx_path)
+
+    # get sales number for each person
+    for record in records_in_persons:
+        sale_num_info = record_str_to_data_list(record)
+        parent_str = sale_num_info[0]
+        retail_int = sale_num_info[1]
+        batch_int = sale_num_info[2]
+        total_int = sale_num_info[3]
+
+        if len(parent_str) <= 0:
+            continue
+
+        # 查找首列内容等于A的行
+        row_index = record_xlsx_data[record_xlsx_data[record_xlsx_column_parent_str] == parent_str].index
+
+        # 如果找到了这样的行，更新第三列和第四列的数据
+        if not row_index.empty:
+            record_xlsx_data.at[row_index[0], record_xlsx_column_retail_sale_str] = retail_int
+            record_xlsx_data.at[row_index[0], record_xlsx_column_batch_sale_str] = batch_int
+            record_xlsx_data.at[row_index[0], record_xlsx_column_total_sale_str] = total_int
+        else:
+            # 如果未找到，新增一行
+            new_row = [parent_str,
+                       '',
+                       '',
+                       retail_int,
+                       batch_int,
+                       total_int
+                       ]
+            record_xlsx_data.loc[len(record_xlsx_data)] = new_row
+
+    record_xlsx_data.to_excel('累计数据.xlsx')

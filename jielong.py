@@ -3,7 +3,9 @@ import re
 
 
 def remove_non_digits(s):
-    return re.sub(r'\D', '', s)
+    # print(s)
+    return re.sub(r'[^\d]', '', s)
+
 
 def save_text_to_file(text_str):
     with open('接龙.txt', 'w', encoding='utf-8') as file:
@@ -14,25 +16,33 @@ def get_sales_count(line, para_start, para_end):
     para_start = para_start.replace(' ', '')
     para_end = para_end.replace(' ', '')
 
+    # print(para_start, para_end)
     start_index = line.find(para_start) + len(para_start)
     end_index = 0
-    max_para_len = 5
+    max_para_len = 8
 
     end_index = line[start_index:].find(para_end) + start_index
 
-
     if end_index <= start_index:
-        sale_num = 0
+        # sale_num = 0
+        return 0
     else:
         if end_index - start_index > max_para_len:
-            end_index = start_index + max_para_len
+            start_index = line[end_index:].find(para_start) + len(para_start)
+            start_index = start_index + end_index
+            end_index = line[start_index:].find(para_end) + start_index
 
+            if end_index <= start_index:
+                # sale_num = 0
+                return 0
+
+        # print(line, line[start_index:end_index])
         try:
-            sale_num = int(line[start_index:end_index])
+            sale_num = int(remove_non_digits(line[start_index:end_index]))
         except:
             print('exception:', line[start_index:end_index])
             sale_num = int(remove_non_digits(line[start_index:end_index]))
-            print(sale_num)
+            # print(sale_num)
 
     # print(sale_num)
     return sale_num
@@ -86,7 +96,7 @@ def sort_sales(para_start='累计收入', para_end='元'):
 
     df = pd.DataFrame({'成交数': sales_counts, 'text': records_in_persons})
     df_sorted = df.sort_values('成交数', ascending=False)
-    # print(df_sorted)
+    print(df_sorted)
 
     print_out = ''
     seq_title = ["\n第一名", "\n第二名", "\n第三名", "\n第四名", "\n第五名",
@@ -125,7 +135,6 @@ def sort_sales(para_start='累计收入', para_end='元'):
     # print(result)
 
     return result
-
 
 
 def find_first_chinese_char(s):

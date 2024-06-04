@@ -10,6 +10,11 @@ record_xlsx_column_batch_sale_str = '批发'
 record_xlsx_column_total_sale_str = '总量'
 jielong_str_lines = ''
 
+def get_date_from_strlines():
+    for line in str_lines:
+        pattern = r"\d+月\d+日"
+        matches = re.findall(pattern, line)
+        return matches
 
 def remove_non_digits(s):
     # print(s)

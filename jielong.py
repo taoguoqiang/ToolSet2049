@@ -1,6 +1,15 @@
 import pandas as pd
 import re
 
+record_xlsx_path = '累计数据.xlsx'
+record_xlsx_column_parent_str = '家长'
+record_xlsx_column_kid_str = '小孩'
+record_xlsx_column_age_str = '年龄'
+record_xlsx_column_retail_sale_str = '零售'
+record_xlsx_column_batch_sale_str = '批发'
+record_xlsx_column_total_sale_str = '总量'
+jielong_str_lines = ''
+
 
 def remove_non_digits(s):
     # print(s)

@@ -1,6 +1,5 @@
 import pandas as pd
 import re
-import openpyxl
 
 record_xlsx_column_parent_str = '家长'
 record_xlsx_column_kid_str = '小孩'

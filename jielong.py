@@ -1,5 +1,6 @@
 import pandas as pd
 import re
+import openpyxl
 
 record_xlsx_column_parent_str = '家长'
 record_xlsx_column_kid_str = '小孩'
@@ -232,6 +233,7 @@ def update_sales_to_record_xlsx(record_xlsx_data):
         return
 
     update_date = get_date_from_strlines()
+    print(update_date)
 
     if len(record_xlsx_data) <= 0:
         record_xlsx_data = pd.DataFrame(columns=record_xlsx_columns)
@@ -239,7 +241,7 @@ def update_sales_to_record_xlsx(record_xlsx_data):
     # get sales number for each person
     for record in records_in_persons:
         sale_num_info = record_str_to_data_list(record)
-        parent_str = sale_num_info[0]
+        parent_str = sale_num_info[0].replace(' ', '')
         retail_int = sale_num_info[1]
         batch_int = sale_num_info[2]
         total_int = sale_num_info[3]
@@ -255,7 +257,7 @@ def update_sales_to_record_xlsx(record_xlsx_data):
             record_xlsx_data.at[row_index[0], record_xlsx_column_retail_sale_str] = retail_int
             record_xlsx_data.at[row_index[0], record_xlsx_column_batch_sale_str] = batch_int
             record_xlsx_data.at[row_index[0], record_xlsx_column_total_sale_str] = total_int
-            record_xlsx_data.at[row_index[0], record_xlsx_column_update_date_str] = update_date
+            # record_xlsx_data.at[row_index[0], record_xlsx_column_update_date_str] = update_date
         else:
             print(parent_str)
             # 如果未找到，新增一行

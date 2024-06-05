@@ -42,7 +42,7 @@ with tab3:
 if __name__ == '__main__':
     i = 0
     # jielong.sort_sales()
-    uploaded_data = pd.read_excel('2024-06-04.xlsx')
-    jielong.update_sales_to_record_xlsx(uploaded_data)
+    # uploaded_data = pd.read_excel('2024-06-04.xlsx')
+    # jielong.update_sales_to_record_xlsx(uploaded_data)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

@@ -256,7 +256,10 @@ def update_sales_to_record_xlsx(record_xlsx_data):
             record_xlsx_data.at[row_index[0], record_xlsx_column_retail_sale_str] = retail_int
             record_xlsx_data.at[row_index[0], record_xlsx_column_batch_sale_str] = batch_int
             record_xlsx_data.at[row_index[0], record_xlsx_column_total_sale_str] = total_int
-            # record_xlsx_data.at[row_index[0], record_xlsx_column_update_date_str] = update_date
+
+            record_xlsx_data[record_xlsx_column_update_date_str] = record_xlsx_data[record_xlsx_column_update_date_str].astype(str)
+            record_xlsx_data.at[row_index[0], record_xlsx_column_update_date_str] = update_date
+            # print(type(record_xlsx_data.at[row_index[0], record_xlsx_column_update_date_str]), type(update_date))
         else:
             print(parent_str)
             # 如果未找到，新增一行

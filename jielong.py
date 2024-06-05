@@ -1,20 +1,33 @@
 import pandas as pd
 import re
 
-record_xlsx_path = '累计数据.xlsx'
 record_xlsx_column_parent_str = '家长'
 record_xlsx_column_kid_str = '小孩'
 record_xlsx_column_age_str = '年龄'
 record_xlsx_column_retail_sale_str = '零售'
 record_xlsx_column_batch_sale_str = '批发'
 record_xlsx_column_total_sale_str = '总量'
-jielong_str_lines = ''
+record_xlsx_column_update_date_str = '更新日期'
+record_xlsx_columns = [record_xlsx_column_parent_str,
+                       record_xlsx_column_kid_str,
+                       record_xlsx_column_age_str,
+                       record_xlsx_column_retail_sale_str,
+                       record_xlsx_column_batch_sale_str,
+                       record_xlsx_column_total_sale_str,
+                       record_xlsx_column_update_date_str]
 
-def get_date_from_strlines():
-    for line in str_lines:
+
+def get_date_from_strlines(filepath='接龙.txt'):
+    with open(filepath, "r", encoding='utf-8') as f:
+        # 逐行读取文件内容
+        lines = f.readlines()
+    for line in lines:
+        print(line)
         pattern = r"\d+月\d+日"
-        matches = re.findall(pattern, line)
-        return matches
+        match = re.search(pattern, line)
+        if match:
+            return match.group(0)
+
 
 def remove_non_digits(s):
     # print(s)
@@ -29,11 +42,17 @@ def save_text_to_file(text_str):
 def get_sales_count(line, para_start, para_end):
     para_start = para_start.replace(' ', '')
     para_end = para_end.replace(' ', '')
+    line = line.replace(' ', '')
 
     # print(para_start, para_end)
-    start_index = line.find(para_start) + len(para_start)
+    start_index = line.find(para_start)
+    # print(start_index)
+    if start_index <= 0:
+        return 0
+
+    start_index += len(para_start)
     end_index = 0
-    max_para_len = 8
+    max_para_len = 5
 
     end_index = line[start_index:].find(para_end) + start_index
 
@@ -50,15 +69,13 @@ def get_sales_count(line, para_start, para_end):
                 # sale_num = 0
                 return 0
 
-        # print(line, line[start_index:end_index])
+        match = re.search(r'\d+', line[start_index:end_index])
         try:
-            sale_num = int(remove_non_digits(line[start_index:end_index]))
+            sale_num = int(match.group(0))
         except:
             print('exception:', line[start_index:end_index])
-            sale_num = int(remove_non_digits(line[start_index:end_index]))
-            # print(sale_num)
+            sale_num = 0
 
-    # print(sale_num)
     return sale_num
 
 
@@ -66,13 +83,13 @@ def seperate_personal(filepath='接龙.txt'):
     # 打开txt文件，文件路径为file_path
     with open(filepath, "r", encoding='utf-8') as f:
         # 逐行读取文件内容
-        lines = f.readlines()
+        jielong_str_lines = f.readlines()
 
     lines_per_person = ''
     records_in_persons = []
 
     # seperate by person
-    for line in lines:
+    for line in jielong_str_lines:
         # format the wrong inputs
         if " ·" in line:
             line = line.replace("·", ".")
@@ -110,7 +127,7 @@ def sort_sales(para_start='累计收入', para_end='元'):
 
     df = pd.DataFrame({'成交数': sales_counts, 'text': records_in_persons})
     df_sorted = df.sort_values('成交数', ascending=False)
-    print(df_sorted)
+    # print(df_sorted)
 
     print_out = ''
     seq_title = ["\n第一名", "\n第二名", "\n第三名", "\n第四名", "\n第五名",
@@ -171,12 +188,17 @@ def get_name_of_parent(line, para_start='.', para_end='家'):
     para_end = para_end.replace(' ', '')
 
     start_index = 0
-    end_index = line[start_index:].find(para_end) + start_index
+    if '石家庄' in line:
+        i = line[start_index:].find('石家庄') + len('石家庄')
+        end_index = line[i:].find(para_end) + i
+    else:
+        end_index = line[start_index:].find(para_end)
 
     name_of_parent = ''
     if end_index <= 0:
         return ''
 
+    end_index += start_index
     start_index = find_first_chinese_char(line[start_index:end_index])
 
     if start_index < 0:
@@ -184,10 +206,11 @@ def get_name_of_parent(line, para_start='.', para_end='家'):
 
     try:
         name_of_parent = line[start_index:end_index]
+        # print(start_index, end_index, name_of_parent)
     except:
         print('exception:', line[start_index:end_index])
         name_of_parent = line[0:end_index]
-        print(name_of_parent)
+        # print(name_of_parent)
 
     return name_of_parent
 
@@ -201,9 +224,17 @@ def record_str_to_data_list(personal_record):
     return [parent_name, retail_sale, batch_sale, total_sale]
 
 
-def update_sales_to_record_xlsx():
+def update_sales_to_record_xlsx(record_xlsx_data):
     records_in_persons = seperate_personal()
-    record_xlsx_data = pd.read_excel(record_xlsx_path)
+    # print(records_in_persons)
+    if len(records_in_persons) <= 0:
+        print('No data!')
+        return
+
+    update_date = get_date_from_strlines()
+
+    if len(record_xlsx_data) <= 0:
+        record_xlsx_data = pd.DataFrame(columns=record_xlsx_columns)
 
     # get sales number for each person
     for record in records_in_persons:
@@ -215,7 +246,7 @@ def update_sales_to_record_xlsx():
 
         if len(parent_str) <= 0:
             continue
-
+        print(parent_str, retail_int, batch_int, total_int)
         # 查找首列内容等于A的行
         row_index = record_xlsx_data[record_xlsx_data[record_xlsx_column_parent_str] == parent_str].index
 
@@ -224,15 +255,22 @@ def update_sales_to_record_xlsx():
             record_xlsx_data.at[row_index[0], record_xlsx_column_retail_sale_str] = retail_int
             record_xlsx_data.at[row_index[0], record_xlsx_column_batch_sale_str] = batch_int
             record_xlsx_data.at[row_index[0], record_xlsx_column_total_sale_str] = total_int
+            record_xlsx_data.at[row_index[0], record_xlsx_column_update_date_str] = update_date
         else:
+            print(parent_str)
             # 如果未找到，新增一行
             new_row = [parent_str,
                        '',
                        '',
                        retail_int,
                        batch_int,
-                       total_int
+                       total_int,
+                       update_date
                        ]
             record_xlsx_data.loc[len(record_xlsx_data)] = new_row
 
-    record_xlsx_data.to_excel('累计数据.xlsx')
+    filename = update_date + '.xlsx'
+    record_xlsx_data.to_excel(filename, index=False)
+
+    return record_xlsx_data
+

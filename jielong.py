@@ -263,14 +263,7 @@ def update_sales_to_record_xlsx(record_xlsx_data):
         else:
             print(parent_str)
             # 如果未找到，新增一行
-            new_row = [parent_str,
-                       '',
-                       '',
-                       retail_int,
-                       batch_int,
-                       total_int,
-                       update_date
-                       ]
+            new_row = record_xlsx_columns
             record_xlsx_data.loc[len(record_xlsx_data)] = new_row
 
     filename = update_date + '.xlsx'

@@ -33,7 +33,7 @@ with tab3:
         if 'xlsx' in uploaded_file.name:
             uploaded_data = pd.read_excel(uploaded_file)
         elif 'csv' in uploaded_file.name:
-            uploaded_data = pd.read_csv(uploaded_file)
+            uploaded_data = pd.read_csv(uploaded_file, encoding='gbk')
 
     if st.button("更新表格", type="primary", use_container_width=True) and len(text_input) > 0:
         jielong.save_text_to_file(text_input)
@@ -45,7 +45,9 @@ with tab3:
 if __name__ == '__main__':
     i = 0
     # jielong.sort_sales()
-    uploaded_data = pd.read_excel('2024-06-04.xlsx')
+    # uploaded_data = pd.read_excel('2024-06-04.xlsx')
+
+    uploaded_data = pd.read_csv('6月8日.CSV', encoding='gbk')
     jielong.update_sales_to_record_xlsx(uploaded_data)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

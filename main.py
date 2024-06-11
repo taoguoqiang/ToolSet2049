@@ -2,6 +2,19 @@ import pandas as pd
 import jielong
 import streamlit as st
 
+
+def try_read_csv(filename):
+    # 尝试使用常见编码类型
+    encodings = ['utf-8', 'gbk', 'gb2312']
+    for encoding in encodings:
+        try:
+            df = pd.read_csv(filename, encoding=encoding)
+            print(f"文件读取成功，使用的编码为: {encoding}")
+            return df
+        except UnicodeDecodeError:
+            print(f"尝试编码: {encoding} 失败")
+
+
 st.title('接龙数据排序')
 text_input = st.text_area(label='请输入接龙信息:', height=200)
 
@@ -33,12 +46,12 @@ with tab3:
         if 'xlsx' in uploaded_file.name:
             uploaded_data = pd.read_excel(uploaded_file)
         elif 'csv' in uploaded_file.name:
-            uploaded_data = pd.read_csv(uploaded_file, encoding='gbk')
+            uploaded_data = try_read_csv(uploaded_file)
 
     if st.button("更新表格", type="primary", use_container_width=True) and len(text_input) > 0:
         jielong.save_text_to_file(text_input)
         updated_data = jielong.update_sales_to_record_xlsx(uploaded_data)
-        st.dataframe(updated_data, use_container_width=True)
+        st.dataframe(updated_data, use_container_width=True, hide_index=True)
 
 
 # Press the green button in the gutter to run the script.
@@ -47,7 +60,7 @@ if __name__ == '__main__':
     # jielong.sort_sales()
     # uploaded_data = pd.read_excel('2024-06-04.xlsx')
 
-    uploaded_data = pd.read_csv('6月8日.CSV', encoding='gbk')
-    jielong.update_sales_to_record_xlsx(uploaded_data)
+    # uploaded_data = pd.read_csv('6月8日.CSV', encoding='gbk')
+    # jielong.update_sales_to_record_xlsx(uploaded_data)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

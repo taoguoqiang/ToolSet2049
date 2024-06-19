@@ -58,9 +58,10 @@ with tab3:
 if __name__ == '__main__':
     i = 0
     # jielong.sort_sales()
-    # uploaded_data = pd.read_excel('2024-06-04.xlsx')
-
+    # uploaded_data = pd.DataFrame()
+    # uploaded_data = pd.read_excel('6月9日.xlsx')
     # uploaded_data = pd.read_csv('6月8日.CSV', encoding='gbk')
     # jielong.update_sales_to_record_xlsx(uploaded_data)
+
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

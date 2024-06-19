@@ -1,16 +1,14 @@
 import pandas as pd
 import re
 
-record_xlsx_column_parent_str = '家长'
-record_xlsx_column_kid_str = '小孩'
-record_xlsx_column_age_str = '年龄'
+# record_xlsx_column_parent_str = '家长'
+# record_xlsx_column_age_str = '年龄'
+record_xlsx_column_kids_str = '孩子'
 record_xlsx_column_retail_sale_str = '零售'
 record_xlsx_column_batch_sale_str = '批发'
 record_xlsx_column_total_sale_str = '总量'
 record_xlsx_column_update_date_str = '更新日期'
-record_xlsx_columns = [record_xlsx_column_parent_str,
-                       record_xlsx_column_kid_str,
-                       record_xlsx_column_age_str,
+record_xlsx_columns = [record_xlsx_column_kids_str,
                        record_xlsx_column_retail_sale_str,
                        record_xlsx_column_batch_sale_str,
                        record_xlsx_column_total_sale_str,
@@ -140,6 +138,8 @@ def sort_sales(para_start='累计收入', para_end='元'):
                  "\n第三十六名", "\n第三十七名", "\n第三十八名", "\n第三十九名", "\n第四十名",
                  "\n第四十一名", "\n第四十二名", "\n第四十三名", "\n第四十四名", "\n第四十五名",
                  "\n第四十六名", "\n第四十七名", "\n第四十八名", "\n第四十九名", "\n第五十名",
+                 "\n第五十一名", "\n第五十二名", "\n第五十三名", "\n第五十四名", "\n第五十五名",
+                 "\n第五十六名", "\n第五十七名", "\n第五十八名", "\n第五十九名", "\n第六十名",
                  ]
     last_top_sales = -1
     top_sales = 0
@@ -215,13 +215,66 @@ def get_name_of_parent(line, para_start='.', para_end='家'):
     return name_of_parent
 
 
+def format_kids_info(input_string):
+    # 定义中文标点符号集合
+    punctuation = set("，、,./")
+    # 使用列表推导式去除中文标点符号
+    formated_string = ''.join([char for char in input_string if char not in punctuation])
+    return formated_string
+
+
+def get_info_of_kids(line, para_start='.', para_end='岁'):
+    para_start = para_start.replace(' ', '')
+    para_end = para_end.replace(' ', '')
+
+    start_index = find_first_chinese_char(line)
+    end_index = 0
+
+    if '家' not in line and '岁' not in line:
+        return ''
+
+    end_index1 = line[start_index:].find(para_end) + 1
+    if end_index1 <= 0:
+        end_index = line[start_index:].find('，') + start_index
+        return line[start_index:end_index]
+
+    end_index1 += start_index
+    try:
+        end_index2 = line[end_index1:].find(para_end) + 1
+
+        if end_index2 > 0:
+            end_index = end_index1 + end_index2
+        else:
+            end_index = end_index1
+
+    except:
+        end_index = 0
+
+    info_of_kids = ''
+
+    if start_index < 0:
+        return ''
+
+    try:
+        info_of_kids = line[start_index:end_index]
+    except:
+        print('exception:', line[start_index:end_index])
+        info_of_kids = line[0:end_index]
+
+    info_of_kids = format_kids_info(info_of_kids)
+    print(info_of_kids)
+
+    return info_of_kids
+
+
 def record_str_to_data_list(personal_record):
-    parent_name = get_name_of_parent(personal_record)
+    # parent_name = get_name_of_parent(personal_record)
+    kids_info = get_info_of_kids(personal_record)
     total_sale = get_sales_count(personal_record, '累计', '本')
     batch_sale = get_sales_count(personal_record, '批发', '本')
     retail_sale = total_sale - batch_sale
 
-    return [parent_name, retail_sale, batch_sale, total_sale]
+    return [kids_info, retail_sale, batch_sale, total_sale]
 
 
 def update_sales_to_record_xlsx(record_xlsx_data):
@@ -240,16 +293,16 @@ def update_sales_to_record_xlsx(record_xlsx_data):
     # get sales number for each person
     for record in records_in_persons:
         sale_num_info = record_str_to_data_list(record)
-        parent_str = sale_num_info[0].replace(' ', '')
+        kids_str = sale_num_info[0].replace(' ', '')
         retail_int = sale_num_info[1]
         batch_int = sale_num_info[2]
         total_int = sale_num_info[3]
 
-        if len(parent_str) <= 0:
+        if len(kids_str) <= 0:
             continue
-        print(parent_str, retail_int, batch_int, total_int)
+        print(kids_str, retail_int, batch_int, total_int)
         # 查找首列内容等于A的行
-        row_index = record_xlsx_data[record_xlsx_data[record_xlsx_column_parent_str] == parent_str].index
+        row_index = record_xlsx_data[record_xlsx_data[record_xlsx_column_kids_str] == kids_str].index
 
         # 如果找到了这样的行，更新第三列和第四列的数据
         if not row_index.empty:
@@ -257,15 +310,14 @@ def update_sales_to_record_xlsx(record_xlsx_data):
             record_xlsx_data.at[row_index[0], record_xlsx_column_batch_sale_str] = batch_int
             record_xlsx_data.at[row_index[0], record_xlsx_column_total_sale_str] = total_int
 
-            record_xlsx_data[record_xlsx_column_update_date_str] = record_xlsx_data[record_xlsx_column_update_date_str].astype(str)
+            record_xlsx_data[record_xlsx_column_update_date_str] = record_xlsx_data[
+                record_xlsx_column_update_date_str].astype(str)
             record_xlsx_data.at[row_index[0], record_xlsx_column_update_date_str] = update_date
             # print(type(record_xlsx_data.at[row_index[0], record_xlsx_column_update_date_str]), type(update_date))
         else:
-            print(parent_str)
+            print(kids_str)
             # 如果未找到，新增一行
-            new_row = [parent_str,
-                       '',
-                       '',
+            new_row = [kids_str,
                        retail_int,
                        batch_int,
                        total_int,
@@ -277,4 +329,3 @@ def update_sales_to_record_xlsx(record_xlsx_data):
     record_xlsx_data.to_excel(filename, index=False)
 
     return record_xlsx_data
-

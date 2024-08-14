@@ -50,7 +50,7 @@ def get_sales_count(line, para_start, para_end):
 
     start_index += len(para_start)
     end_index = 0
-    max_para_len = 5
+    max_para_len = 8
 
     end_index = line[start_index:].find(para_end) + start_index
 
@@ -67,11 +67,17 @@ def get_sales_count(line, para_start, para_end):
                 # sale_num = 0
                 return 0
 
-        match = re.search(r'\d+', line[start_index:end_index])
+        match = re.search(r'\d+\.\d+|\d+', line[start_index:end_index])
         try:
-            sale_num = int(match.group(0))
+            if match:
+                num_str = match.group()
+                if '.' in num_str:
+                    sale_num = float(num_str)
+                    print('floating sales: ', sale_num, para_start, para_end, line[start_index:end_index])
+                else:
+                    sale_num = int(num_str)
         except:
-            print('exception:', line[start_index:end_index])
+            print('get_sales_count exception:', line[start_index:end_index])
             sale_num = 0
 
     return sale_num
@@ -92,7 +98,7 @@ def seperate_personal(filepath='接龙.txt'):
         if " ·" in line:
             line = line.replace("·", ".")
 
-        if ". " not in line:
+        if "家" not in line:
             lines_per_person += line
         else:
             # print(lines_per_person)
@@ -105,6 +111,8 @@ def seperate_personal(filepath='接龙.txt'):
 
     if len(lines_per_person) > 0:
         records_in_persons.append(lines_per_person)
+
+    print("records_in_persons", len(records_in_persons))
 
     return records_in_persons
 
@@ -140,6 +148,8 @@ def sort_sales(para_start='累计收入', para_end='元'):
                  "\n第四十六名", "\n第四十七名", "\n第四十八名", "\n第四十九名", "\n第五十名",
                  "\n第五十一名", "\n第五十二名", "\n第五十三名", "\n第五十四名", "\n第五十五名",
                  "\n第五十六名", "\n第五十七名", "\n第五十八名", "\n第五十九名", "\n第六十名",
+                 "\n第六十一名", "\n第六十二名", "\n第六十三名", "\n第六十四名", "\n第六十五名",
+                 "\n第六十六名", "\n第六十七名", "\n第六十八名", "\n第六十九名", "\n第七十名",
                  ]
     last_top_sales = -1
     top_sales = 0
@@ -162,7 +172,7 @@ def sort_sales(para_start='累计收入', para_end='元'):
 
         last_top_sales = top_sales
 
-    result = print_out.replace('.', '')
+    result = print_out
     # print(result)
 
     return result
@@ -208,7 +218,7 @@ def get_name_of_parent(line, para_start='.', para_end='家'):
         name_of_parent = line[start_index:end_index]
         # print(start_index, end_index, name_of_parent)
     except:
-        print('exception:', line[start_index:end_index])
+        print('get_name_of_parent exception:', line[start_index:end_index])
         name_of_parent = line[0:end_index]
         # print(name_of_parent)
 
@@ -258,7 +268,7 @@ def get_info_of_kids(line, para_start='.', para_end='岁'):
     try:
         info_of_kids = line[start_index:end_index]
     except:
-        print('exception:', line[start_index:end_index])
+        print('get_info_of_kids exception:', line[start_index:end_index])
         info_of_kids = line[0:end_index]
 
     info_of_kids = format_kids_info(info_of_kids)

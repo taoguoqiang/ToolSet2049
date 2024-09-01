@@ -7,11 +7,13 @@ record_xlsx_column_kids_str = '孩子'
 record_xlsx_column_retail_sale_str = '零售'
 record_xlsx_column_batch_sale_str = '批发'
 record_xlsx_column_total_sale_str = '总量'
+record_xlsx_column_ask_counts_str = '问询'
 record_xlsx_column_update_date_str = '更新日期'
 record_xlsx_columns = [record_xlsx_column_kids_str,
                        record_xlsx_column_retail_sale_str,
                        record_xlsx_column_batch_sale_str,
                        record_xlsx_column_total_sale_str,
+                       record_xlsx_column_ask_counts_str,
                        record_xlsx_column_update_date_str]
 
 
@@ -98,7 +100,9 @@ def seperate_personal(filepath='接龙.txt'):
         if " ·" in line:
             line = line.replace("·", ".")
 
-        if "家" not in line:
+        if len(line) < 10:
+            continue
+        elif "家" not in line:
             lines_per_person += line
         else:
             # print(lines_per_person)
@@ -106,7 +110,7 @@ def seperate_personal(filepath='接龙.txt'):
             # print(records_in_persons)
             # print("-----------")
 
-            lines_per_person = ''
+            lines_per_person = '\n'
             lines_per_person += line
 
     if len(lines_per_person) > 0:
@@ -117,7 +121,7 @@ def seperate_personal(filepath='接龙.txt'):
     return records_in_persons
 
 
-def sort_sales(para_start='累计收入', para_end='元'):
+def sort_sales(para_start='收入', para_end='元'):
     records_in_persons = seperate_personal()
 
     sales_counts = []
@@ -136,20 +140,20 @@ def sort_sales(para_start='累计收入', para_end='元'):
     # print(df_sorted)
 
     print_out = ''
-    seq_title = ["\n第一名", "\n第二名", "\n第三名", "\n第四名", "\n第五名",
-                 "\n第六名", "\n第七名", "\n第八名", "\n第九名", "\n第十名",
-                 "\n第十一名", "\n第十二名", "\n第十三名", "\n第十四名", "\n第十五名",
-                 "\n第十六名", "\n第十七名", "\n第十八名", "\n第十九名", "\n第二十名",
-                 "\n第二十一名", "\n第二十二名", "\n第二十三名", "\n第二十四名", "\n第二十五名",
-                 "\n第二十六名", "\n第二十七名", "\n第二十八名", "\n第二十九名", "\n第三十名",
-                 "\n第三十一名", "\n第三十二名", "\n第三十三名", "\n第三十四名", "\n第三十五名",
-                 "\n第三十六名", "\n第三十七名", "\n第三十八名", "\n第三十九名", "\n第四十名",
-                 "\n第四十一名", "\n第四十二名", "\n第四十三名", "\n第四十四名", "\n第四十五名",
-                 "\n第四十六名", "\n第四十七名", "\n第四十八名", "\n第四十九名", "\n第五十名",
-                 "\n第五十一名", "\n第五十二名", "\n第五十三名", "\n第五十四名", "\n第五十五名",
-                 "\n第五十六名", "\n第五十七名", "\n第五十八名", "\n第五十九名", "\n第六十名",
-                 "\n第六十一名", "\n第六十二名", "\n第六十三名", "\n第六十四名", "\n第六十五名",
-                 "\n第六十六名", "\n第六十七名", "\n第六十八名", "\n第六十九名", "\n第七十名",
+    seq_title = ["\n第一名\n", "\n第二名\n", "\n第三名\n", "\n第四名\n", "\n第五名\n",
+                 "\n第六名\n", "\n第七名\n", "\n第八名\n", "\n第九名\n", "\n第十名\n",
+                 "\n第十一名\n", "\n第十二名\n", "\n第十三名\n", "\n第十四名\n", "\n第十五名\n",
+                 "\n第十六名\n", "\n第十七名\n", "\n第十八名\n", "\n第十九名\n", "\n第二十名\n",
+                 "\n第二十一名\n", "\n第二十二名\n", "\n第二十三名\n", "\n第二十四名\n", "\n第二十五名\n",
+                 "\n第二十六名\n", "\n第二十七名\n", "\n第二十八名\n", "\n第二十九名\n", "\n第三十名\n",
+                 "\n第三十一名\n", "\n第三十二名\n", "\n第三十三名\n", "\n第三十四名\n", "\n第三十五名\n",
+                 "\n第三十六名\n", "\n第三十七名\n", "\n第三十八名\n", "\n第三十九名\n", "\n第四十名\n",
+                 "\n第四十一名\n", "\n第四十二名\n", "\n第四十三名\n", "\n第四十四名\n", "\n第四十五名\n",
+                 "\n第四十六名\n", "\n第四十七名\n", "\n第四十八名\n", "\n第四十九名\n", "\n第五十名\n",
+                 "\n第五十一名\n", "\n第五十二名\n", "\n第五十三名\n", "\n第五十四名\n", "\n第五十五名\n",
+                 "\n第五十六名\n", "\n第五十七名\n", "\n第五十八名\n", "\n第五十九名\n", "\n第六十名\n",
+                 "\n第六十一名\n", "\n第六十二名\n", "\n第六十三名\n", "\n第六十四名\n", "\n第六十五名\n",
+                 "\n第六十六名\n", "\n第六十七名\n", "\n第六十八名\n", "\n第六十九名\n", "\n第七十名\n",
                  ]
     last_top_sales = -1
     top_sales = 0
@@ -157,8 +161,10 @@ def sort_sales(para_start='累计收入', para_end='元'):
     for index, row in df_sorted.iterrows():
         top_sales = row['成交数']
         i = row['text']
-
-        i = i[i.find("."):]
+        # print(i)
+        if "." in i:
+            i = i[i.find(".") + 1:]
+        # print(top_sales, i)
         if len(i) == 0:
             continue
         if top_sales == last_top_sales:
@@ -282,9 +288,10 @@ def record_str_to_data_list(personal_record):
     kids_info = get_info_of_kids(personal_record)
     total_sale = get_sales_count(personal_record, '累计', '本')
     batch_sale = get_sales_count(personal_record, '批发', '本')
+    ask_counts = get_sales_count(personal_record, '问询', '次')
     retail_sale = total_sale - batch_sale
 
-    return [kids_info, retail_sale, batch_sale, total_sale]
+    return [kids_info, retail_sale, batch_sale, total_sale, ask_counts]
 
 
 def update_sales_to_record_xlsx(record_xlsx_data):
@@ -295,7 +302,7 @@ def update_sales_to_record_xlsx(record_xlsx_data):
         return
 
     update_date = get_date_from_strlines()
-    print(update_date)
+    # print(update_date)
 
     if len(record_xlsx_data) <= 0:
         record_xlsx_data = pd.DataFrame(columns=record_xlsx_columns)
@@ -307,10 +314,11 @@ def update_sales_to_record_xlsx(record_xlsx_data):
         retail_int = sale_num_info[1]
         batch_int = sale_num_info[2]
         total_int = sale_num_info[3]
+        ask_int = sale_num_info[4]
 
         if len(kids_str) <= 0:
             continue
-        print(kids_str, retail_int, batch_int, total_int)
+        print(kids_str, retail_int, batch_int, total_int, ask_int)
         # 查找首列内容等于A的行
         row_index = record_xlsx_data[record_xlsx_data[record_xlsx_column_kids_str] == kids_str].index
 
@@ -319,6 +327,7 @@ def update_sales_to_record_xlsx(record_xlsx_data):
             record_xlsx_data.at[row_index[0], record_xlsx_column_retail_sale_str] = retail_int
             record_xlsx_data.at[row_index[0], record_xlsx_column_batch_sale_str] = batch_int
             record_xlsx_data.at[row_index[0], record_xlsx_column_total_sale_str] = total_int
+            record_xlsx_data.at[row_index[0], record_xlsx_column_ask_counts_str] = ask_int
 
             record_xlsx_data[record_xlsx_column_update_date_str] = record_xlsx_data[
                 record_xlsx_column_update_date_str].astype(str)
@@ -331,6 +340,7 @@ def update_sales_to_record_xlsx(record_xlsx_data):
                        retail_int,
                        batch_int,
                        total_int,
+                       ask_int,
                        update_date
                        ]
             record_xlsx_data.loc[len(record_xlsx_data)] = new_row

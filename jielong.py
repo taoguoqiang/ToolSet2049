@@ -123,17 +123,20 @@ def seperate_personal(filepath='接龙.txt'):
 
 def sort_sales(para_start='收入', para_end='元'):
     records_in_persons = seperate_personal()
-
     sales_counts = []
+    error_messages = []  # 新增：用于收集错误信息
+    
     # get sales number for each person
     for record in records_in_persons:
-        if para_start in record:
-            sales_counts.append((get_sales_count(record, para_start, para_end)))
-            # print("-----------")
-            # print(record)
-        else:
+        try:
+            if para_start in record:
+                sale_count = get_sales_count(record, para_start, para_end)
+                sales_counts.append(sale_count)
+            else:
+                sales_counts.append(0)
+        except Exception as e:
+            error_messages.append(f"\n-----------\n处理销售数据时出错: {str(e)}\n{record}")  # 修改：收集错误信息
             sales_counts.append(0)
-            # print(record)
 
     df = pd.DataFrame({'成交数': sales_counts, 'text': records_in_persons})
     df_sorted = df.sort_values('成交数', ascending=False)
@@ -179,7 +182,8 @@ def sort_sales(para_start='收入', para_end='元'):
         last_top_sales = top_sales
 
     result = print_out
-    # print(result)
+    if error_messages:  # 新增：如果有错误信息，添加到结果末尾
+        result += "\n\n错误信息：" + "".join(error_messages)
 
     return result
 
@@ -288,10 +292,12 @@ def record_str_to_data_list(personal_record):
     kids_info = get_info_of_kids(personal_record)
     total_sale = get_sales_count(personal_record, '累计', '本')
     batch_sale = get_sales_count(personal_record, '批发', '本')
-    ask_counts = get_sales_count(personal_record, '问询', '次')
+    ask_counts = get_sales_count(personal_record, '今天问询', '次')
+    daily_sale = get_sales_count(personal_record, '成交', '本')
+    daily_income = get_sales_count(personal_record, '当天收入', '元')
     retail_sale = total_sale - batch_sale
 
-    return [kids_info, retail_sale, batch_sale, total_sale, ask_counts]
+    return [kids_info, retail_sale, batch_sale, total_sale, ask_counts, daily_sale, daily_income]
 
 
 def update_sales_to_record_xlsx(record_xlsx_data):
@@ -315,10 +321,12 @@ def update_sales_to_record_xlsx(record_xlsx_data):
         batch_int = sale_num_info[2]
         total_int = sale_num_info[3]
         ask_int = sale_num_info[4]
+        daily_sale_int = sale_num_info[5]
+        income_float = sale_num_info[6]
 
         if len(kids_str) <= 0:
             continue
-        print(kids_str, retail_int, batch_int, total_int, ask_int)
+        print(kids_str, retail_int, batch_int, total_int, ask_int, daily_sale_int, income_float)
         # 查找首列内容等于A的行
         row_index = record_xlsx_data[record_xlsx_data[record_xlsx_column_kids_str] == kids_str].index
 

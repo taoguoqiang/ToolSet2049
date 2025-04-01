@@ -43,6 +43,7 @@ def get_sales_count(line, para_start, para_end):
     para_start = para_start.replace(' ', '')
     para_end = para_end.replace(' ', '')
     line = line.replace(' ', '')
+    sale_num = 0
 
     # print(para_start, para_end)
     start_index = line.find(para_start)
